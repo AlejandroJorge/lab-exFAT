@@ -71,11 +71,11 @@ int main(int argc, char *argv[]) {
   int selectedCluster = atoi(argv[2]);
 
   size_t clusterSizeInBytes =
-      pow(2.0, boot.SectorPerCluster) * pow(2.0, boot.BytePerSector);
+      pow(2.0, boot.SectorPerCluster + boot.BytePerSector);
   size_t allocationBitMapOffset =
       boot.ClusterHeapOffset * pow(2.0, boot.BytePerSector);
 
-  char allocationBitMap[boot.ClusterCount - 2];
+  unsigned char allocationBitMap[boot.ClusterCount];
   if (lseek(fd, allocationBitMapOffset, SEEK_SET) < 0)
     perror("Error en seek\n");
 
