@@ -65,31 +65,46 @@ int main(int argc, char *argv[]) {
 
   while (1) {
     DirEntry entry;
-    unsigned char entryType;
-    unsigned char secondaryCount;
 
-    // Leer el candidato a File Directory Entry
-    if (read(fd, entry, sizeof(DirEntry)) < 0)
-      perror("Error leyendo DirEntry\n");
+    if (read(fd, &entry, sizeof(DirEntry)) < 0)
+      perror("Error leyendo entrada del directorio");
 
-    entryType = entry[0];
-    if (entryType != 0x85) {
+    unsigned char entryType = entry[0];
+
+    if (entryType == 0)
       break;
+
+    if (entryType != 0x85)
+      continue;
+
+    // Leer Stream Extension Directory Entry
+    if (read(fd, &entry, sizeof(DirEntry)) < 0)
+      perror("Error leyendo entrada del directorio");
+
+    unsigned char nameLength = entry[3];
+    unsigned int firstCluster = entry[20];
+
+    printf("Archivo \"");
+
+    unsigned int amountFileNameEntries = (nameLength + 15) / 15;
+    for (size_t i = 0; i < amountFileNameEntries; i++) {
+      // Leer File Name Directory Entry
+      if (read(fd, &entry, sizeof(DirEntry)) < 0)
+        perror("Error leyendo entrada del directorio");
+
+      char *nameSection = &entry[2];
+      unsigned int charsToPrint = 30;
+      if (nameLength * 2 < charsToPrint)
+        charsToPrint = nameLength * 2;
+
+      for (unsigned int i = 0; i < charsToPrint; i++) {
+        printf("%c", nameSection[i]);
+      }
+
+      nameLength -= charsToPrint;
     }
 
-    secondaryCount = entry[1] - 1;
-
-    // Leer el Stream Extension Directory Entry
-    if (read(fd, entry, sizeof(DirEntry)) < 0)
-      perror("Error leyendo DirEntry\n");
-
-    // Leer los File Name Extension Directory Entry
-    for (size_t i = 0; i < secondaryCount; i++) {
-      if (read(fd, entry, sizeof(DirEntry)) < 0)
-        perror("Error leyendo DirEntry\n");
-
-      entryType = entry[0];
-    }
+    printf("\" con primer cluster nro %d\n", firstCluster);
   }
 
   exit(0);
