@@ -51,6 +51,23 @@ int main(int argc, char *argv[]) {
   if (read(fd, &boot, sizeof(boot)) < 0)
     perror("No se pudo leer la imagen del disco\n");
 
+  unsigned int FAT[boot.ClusterCount];
+  size_t FAToffset = boot.FATOffset * (int)pow(2.0, boot.BytePerSector);
+
+  if (lseek(fd, FAToffset, SEEK_SET) < 0)
+    perror("Error en seek\n");
+
+  unsigned int mediaType;
+  if (read(fd, &mediaType, sizeof(mediaType)) < 0)
+    perror("Error leyendo mediatype\n");
+
+  unsigned int FATconstant;
+  if (read(fd, &FATconstant, sizeof(FATconstant)) < 0)
+    perror("Error leyendo FATconstant\n");
+
+  if (read(fd, &FAT, sizeof(FAT)) < 0)
+    perror("No se pudo leer el FAT\n");
+
   size_t bytesPerCluster = pow(2.0, boot.BytePerSector + boot.SectorPerCluster);
   size_t rootDirOffset = boot.ClusterHeapOffset * pow(2.0, boot.BytePerSector) +
                          2 * bytesPerCluster;
@@ -106,9 +123,20 @@ int main(int argc, char *argv[]) {
       leftToPrint -= charsToPrint;
     }
 
-    printf("\" (%d caracteres unicode) con primer cluster nro %d y tamano de "
+    printf("\" (%d caracteres unicode)\ncon primer cluster nro %d y tamano de "
            "ese primer cluster %llu bytes\n",
            nameLength, firstCluster, dataSize);
+
+    printf("\tMostrando cadena de clusters\n");
+
+    unsigned int currCluster = firstCluster;
+    while (currCluster != CLUSTER_EOF && currCluster <= CLUSTER_MAX &&
+           currCluster >= CLUSTER_MIN) {
+      printf("\t\t* Cluster nro %d\n", currCluster);
+      currCluster = FAT[currCluster];
+    }
+
+    printf("\n");
   }
 
   exit(0);
