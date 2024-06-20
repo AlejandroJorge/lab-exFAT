@@ -52,8 +52,10 @@ int main(int argc, char *argv[]) {
     perror("No se pudo leer la imagen del disco\n");
 
   size_t bytesPerCluster = pow(2.0, boot.BytePerSector + boot.SectorPerCluster);
-  size_t rootDirOffset = boot.ClusterHeapOffset * pow(2.0, boot.BytePerSector) +
-                         2 * bytesPerCluster;
+  size_t rootDirOffset =
+      boot.ClusterHeapOffset * pow(2.0, boot.BytePerSector) +
+      (boot.RootDirFirstCluster - 2) *
+          pow(2.0, boot.BytePerSector + boot.SectorPerCluster);
 
   // Goes to the rootDir
   if (lseek(fd, rootDirOffset, SEEK_SET) < 0)

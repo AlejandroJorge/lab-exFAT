@@ -34,7 +34,7 @@ typedef struct {
   short BootSignature;
 } __attribute((packed)) exFatBootSector;
 
-int getBit(char var, int n) { return ((var & (1 << (n))) ? 1 : 0); }
+int getBit(char var, int n) { return (var & (1 << n)) > 0; }
 
 int main(int argc, char *argv[]) {
   int fd, exp;
@@ -82,8 +82,8 @@ int main(int argc, char *argv[]) {
   if (read(fd, allocationBitMap, sizeof(allocationBitMap)) < 0)
     perror("Error leyendo AllocationBitmap\n");
 
-  int bitOffset = selectedCluster % 8;
-  int byteOffset = selectedCluster / 8;
+  int bitOffset = (selectedCluster - 2) % 8;
+  int byteOffset = (selectedCluster - 2) / 8;
 
   int isAllocated = getBit(allocationBitMap[byteOffset], bitOffset);
   if (isAllocated) {

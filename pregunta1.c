@@ -74,18 +74,18 @@ int main(int argc, char *argv[]) {
   }
 
   printf("Valor dentro en la entrada FAT para el cluster %d: %d\n",
-         selectedCluster, FAT[selectedCluster]);
+         selectedCluster, FAT[selectedCluster - 2]);
 
-  if (FAT[selectedCluster] <= CLUSTER_MAX &&
-      FAT[selectedCluster] >= CLUSTER_MIN) {
+  if (FAT[selectedCluster - 2] <= CLUSTER_MAX &&
+      FAT[selectedCluster - 2] >= CLUSTER_MIN) {
     printf(
         "EL cluster %d forma parte de una cadena de clusters, esta ocupado\n",
         selectedCluster);
-  } else if (FAT[selectedCluster] == CLUSTER_EOF) {
+  } else if (FAT[selectedCluster - 2] == CLUSTER_EOF) {
     printf(
         "El cluster %d es el ultimo de una cadena de clusters, esta ocupado\n",
         selectedCluster);
-  } else if (FAT[selectedCluster] == 0) {
+  } else if (FAT[selectedCluster - 2] == 0) {
     printf("El cluster %d esta libre\n", selectedCluster);
   } else {
     printf(

@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
     while (currCluster != CLUSTER_EOF && currCluster <= CLUSTER_MAX &&
            currCluster >= CLUSTER_MIN) {
       printf("\t\t* Cluster nro %d\n", currCluster);
-      currCluster = FAT[currCluster];
+      currCluster = FAT[currCluster - 2];
     }
 
     printf("\n");
